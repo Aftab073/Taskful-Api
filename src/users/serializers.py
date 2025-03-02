@@ -14,6 +14,22 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
     
+    def update(self, instance, validated_data):
+        try:
+            user = instance
+            password = validated_data.pop('old_password')
+            old_password = validated_data.pop('old_password')
+            if user.check_password(old_password):
+                user.set_password(password)
+            else:
+                raise Exception("Incorrect Password.")
+            user.save()
+        except Exception as err:
+            raise serializers.ValidationError(err)
+        return super(UserSerializer, self).update(instance, validated_data)
+    
+
+
     class Meta:
         model = User
         fields = ['url', 'id', 'username', 'email', 'first_name', 'last_name','password', ]
