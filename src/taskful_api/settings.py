@@ -29,6 +29,20 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+import django
+from django.db import models
+
+if django.VERSION >= (3, 1):
+    from django.db.models import JSONField
+else:
+    from django.contrib.postgres.fields import JSONField
+
+class MyJSONField(models.TextField):  
+    """ Custom field to replace JSONField for SQLite """
+    pass
+
+models.JSONField = MyJSONField
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,6 +51,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'oauth2_provider',
+    'social_django',
+    'rest_framework_social_oauth2',
     'users',
 ]
 
@@ -63,6 +81,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -99,6 +119,27 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+Rest_Framework = {
+    'DEFAULT_PERMISSION_CLASSES':[
+        'rest_framework.permissions.IsauthenticatedOrReadOnly',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+
+        #Oauth Authentication Classes
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_social_oauth2.authentication.SocialAuthentication',
+
+    ],
+}
+
+AUTHENTICATION_BACKENDS = {
+    'django.contrib.auth.backends.ModelBackend',
+    'rest_framework_social_oauth2.backends.DjangoOAuth2',
+
+}
 
 
 # Internationalization
